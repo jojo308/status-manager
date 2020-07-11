@@ -7,6 +7,14 @@ public class Tasks {
 
     private List<Task> tasks;
 
+    // the no-arg constructor is needed for JAXB to work
+    public Tasks() {
+    }
+
+    public Tasks(List<Task> tasks) {
+        this.tasks = tasks;
+    }
+
     public List<Task> getTasks() {
         return tasks;
     }
@@ -20,14 +28,10 @@ public class Tasks {
      * adds a task to the tasks list
      *
      * @param task the task to be added
-     * @return true if the task can be added, false otherwise
      */
-    public boolean add(Task task) {
-        if (tasks == null) {
-            return false;
-        } else {
+    public void add(Task task) {
+        if (tasks != null) {
             tasks.add(task);
-            return true;
         }
     }
 
