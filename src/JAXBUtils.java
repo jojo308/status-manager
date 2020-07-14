@@ -1,12 +1,4 @@
-import org.w3c.dom.Document;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.bind.*;
 import java.io.File;
 
 public class JAXBUtils {
@@ -24,21 +16,34 @@ public class JAXBUtils {
     private static Tasks read() throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(Tasks.class);
         Unmarshaller unmarshaller = context.createUnmarshaller();
-        tasks = (Tasks) unmarshaller.unmarshal(file);
+
+        try {
+            tasks = (Tasks) unmarshaller.unmarshal(file);
+        } catch (UnmarshalException e) {
+            return new Tasks();
+        }
         return tasks;
     }
 
     // writes the task to the XML file
     public static void write(Tasks tasks) throws JAXBException {
+        read();
         JAXBContext context = JAXBContext.newInstance(Tasks.class);
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+        if (isDocEmpty()) {
+            marshaller.marshal(new Tasks(), file);
+        }
         marshaller.marshal(tasks, file);
     }
 
     // edits a specific task in the XML file
     public static void edit(Task task) throws JAXBException {
         tasks = read();
+        if (isDocEmpty()) {
+            tasks = new Tasks();
+        }
         tasks.set(task);
         marshal();
     }
@@ -46,6 +51,9 @@ public class JAXBUtils {
     // deletes a specific task from the XML file
     public static void delete(int id) throws JAXBException {
         tasks = read();
+        if (isDocEmpty()) {
+            tasks = new Tasks();
+        }
         tasks.remove(id);
         marshal();
     }
@@ -61,14 +69,7 @@ public class JAXBUtils {
         return tasks.get(row);
     }
 
-    public static boolean hasRoot() throws ParserConfigurationException {
-        DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = df.newDocumentBuilder();
-        Document doc = db.newDocument();
-        return doc.getElementsByTagName("task").getLength() > 0;
-    }
-
     public static boolean isDocEmpty() {
-        return tasks == null;
+        return tasks == null || tasks.size() < 1;
     }
 }
