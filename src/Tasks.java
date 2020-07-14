@@ -1,5 +1,6 @@
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement(name = "tasks")
@@ -9,6 +10,7 @@ public class Tasks {
 
     // the no-arg constructor is needed for JAXB to work
     public Tasks() {
+        tasks = new ArrayList<>();
     }
 
     public Tasks(List<Task> tasks) {
@@ -16,6 +18,9 @@ public class Tasks {
     }
 
     public List<Task> getTasks() {
+        if (tasks == null) {
+            tasks = new ArrayList<>();
+        }
         return tasks;
     }
 
@@ -62,19 +67,28 @@ public class Tasks {
     }
 
     /**
-     * returns the next id if another task is added, returns -1 if the list is empty
+     * returns the next id if another task is added, returns 1 if the list is empty
      *
      * @return the next id
      */
     public int getNextId() {
-        return (tasks == null) ? -1 : getLast().getId() + 1;
+        Task last = getLast();
+        return (last == null) ? 1 : last.getId()+1;
     }
 
     /**
      * @return the last task in the list
      */
     public Task getLast() {
+        if (tasks.isEmpty()) {
+            return null;
+        }
+
         return tasks.get(tasks.size() - 1);
+    }
+
+    public int size() {
+        return (tasks == null) ? 0 : tasks.size();
     }
 
     @Override
