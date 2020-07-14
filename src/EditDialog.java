@@ -1,6 +1,6 @@
 import java.awt.*;
 
-public class EditDialog extends CustomDialog {
+public class EditDialog extends TaskDialog {
 
     private final int id;
 

@@ -3,7 +3,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class CustomDialog extends JDialog implements ActionListener {
+public class TaskDialog extends JDialog implements ActionListener {
 
     int OK_OPTION = 0;
     int CANCEL_OPTION = -1;
@@ -15,7 +15,7 @@ public class CustomDialog extends JDialog implements ActionListener {
     private final JLabel emptyName, emptyStatus;
     final JButton ok, cancel;
 
-    public CustomDialog(Frame parent) {
+    public TaskDialog(Frame parent) {
         super(parent, "task", true);
         this.setResizable(false);
 
