@@ -4,51 +4,46 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainFrame extends JFrame {
 
     private final String src = "resources\\taskList.xml";
+    private boolean isEmpty;
 
-    private final static String TITLE = "Status Manager";
-    private final static int FRAME_WIDTH = 300;
-    private final static int FRAME_HEIGHT = 500;
-
-    private JTable table;
-    private TaskTableModel model;
+    private final JTable table;
+    private final TaskTableModel model;
     ArrayList<Task> data;
+    JLabel emptyListLabel;
 
     public MainFrame() {
-        setTitle(TITLE);
-        setSize(FRAME_WIDTH, FRAME_HEIGHT);
+        setTitle("Status Manager");
+        setSize(300, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // keyListener
         KeyListener listener = new EventHandler();
         addKeyListener(listener);
 
-        JLabel emptyListLabel = new JLabel
+        // label to display when the table is empty
+        emptyListLabel = new JLabel
                 ("<html>there are currently no tasks," +
                         "<br> click [add] to add a task</html>");
 
+        // table panel
         JPanel tablePanel = new JPanel();
+        data = new ArrayList<>(readDocument().getTasks());
+        model = new TaskTableModel(data);
+        table = new JTable(model);
 
-        // retrieve data from XML file and put in in a table
-        try {
-            table = refresh();
-            tablePanel.add(table);
-        } catch (NullPointerException e) {
-            tablePanel.add(emptyListLabel);
-        }
-
-        // contentPane
-        JPanel contentPane = new JPanel();
-        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
+        tablePanel.add(table);
+        tablePanel.add(emptyListLabel);
+        refresh();
 
         // buttonPanel
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
 
+        // buttons
         JButton addBtn = new JButton("add");
         addBtn.addActionListener(addPressed(this));
 
@@ -62,6 +57,10 @@ public class MainFrame extends JFrame {
         buttonPanel.add(editBtn);
         buttonPanel.add(deleteBtn);
 
+        // contentPane
+        JPanel contentPane = new JPanel();
+        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
+
         contentPane.add(buttonPanel);
         contentPane.add(tablePanel);
 
@@ -69,23 +68,21 @@ public class MainFrame extends JFrame {
         setVisible(true);
     }
 
-    private List<Task> readDocument() {
+    private Tasks readDocument() {
         try {
-            return JAXBUtils.read(src).getTasks();
-        } catch (JAXBException e) {
-            e.printStackTrace();
-            return new ArrayList<>();
+            return JAXBUtils.read(src);
+        } catch (JAXBException | NullPointerException ignored) {
         }
+        return new Tasks();
     }
 
     private ActionListener addPressed(JFrame parent) {
         return e -> {
-            CustomDialog dialog = new CustomDialog(parent);
+            TaskDialog dialog = new TaskDialog(parent);
             Task task = dialog.display();
 
-            if (CustomDialog.result == 0) {
+            if (TaskDialog.result == 0) {
                 try {
-                    JAXBUtils.read(src);
                     Tasks tasks = JAXBUtils.read(src);
                     task.setId(tasks.getNextId());
                     tasks.add(task);
@@ -101,14 +98,15 @@ public class MainFrame extends JFrame {
     private ActionListener editPressed(JFrame parent) {
         return e -> {
             int row = table.getSelectedRow();
-            if (row == -1) {
+            if (isEmpty) {
+                JOptionPane.showMessageDialog(this, "there are no tasks to edit, add \na task to be able to edit tasks");
+            } else if (row == -1) {
                 JOptionPane.showMessageDialog(this, "please select a task");
             } else {
                 Task task = model.getTask(row);
-                CustomDialog dialog = new EditDialog(parent, task);
+                TaskDialog dialog = new EditDialog(parent, task);
                 Task updated = dialog.display();
-
-                if (CustomDialog.result == 0) {
+                if (TaskDialog.result == 0) {
                     try {
                         JAXBUtils.read(src);
                         JAXBUtils.edit(updated);
@@ -124,12 +122,14 @@ public class MainFrame extends JFrame {
     private ActionListener deletePressed(JFrame parent) {
         return e -> {
             int row = table.getSelectedRow();
-            if (row == -1) {
+            if (isEmpty) {
+                JOptionPane.showMessageDialog(this, "there are no tasks to delete, add \na task to be able to delete tasks");
+            } else if (row == -1) {
                 JOptionPane.showMessageDialog(this, "please select a task");
             } else {
                 Task task = model.getTask(row);
                 int result = JOptionPane.showConfirmDialog(parent, "Are you sure you want to delete this task?\n" +
-                        "it can't be undone later", "delete task", JOptionPane.YES_NO_OPTION);
+                        "this can't be undone later", "delete task", JOptionPane.YES_NO_OPTION);
 
                 if (result == 0) {
                     try {
@@ -139,8 +139,6 @@ public class MainFrame extends JFrame {
                     } catch (JAXBException jaxbException) {
                         jaxbException.printStackTrace();
                     }
-                } else {
-                    System.out.println("action cancelled");
                 }
             }
         };
@@ -165,25 +163,26 @@ public class MainFrame extends JFrame {
                 model.addRow(task);
                 break;
             case edit:
-                model.setValueAt(task.getName(), row, 0);
-                model.setValueAt(task.getStatus(), row, 1);
+                model.setValueAt(task, row);
                 break;
             case delete:
                 model.remove(row);
                 break;
         }
-        System.out.println("updated " + task.toString() + " (" + type + ")");
-        model.fireTableDataChanged(); //todo edit task properly
+        model.fireTableDataChanged();
+        refresh();
     }
 
-    public JTable refresh() {
-        data = new ArrayList<>(readDocument());
-        model = new TaskTableModel(data);
-        return new JTable(model);
-    }
-
-    public boolean isFocusable() {
-        return true;
+    public void refresh() {
+        if (model.isEmpty()) {
+            table.setVisible(false);
+            emptyListLabel.setVisible(true);
+            isEmpty = true;
+        } else {
+            table.setVisible(true);
+            emptyListLabel.setVisible(false);
+            isEmpty = false;
+        }
     }
 }
 
