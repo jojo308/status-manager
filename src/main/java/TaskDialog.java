@@ -3,24 +3,54 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/**
+ * The TaskDialog is an extension of JDialog. It creates a dialog wherein
+ * you can create a task. It also validates the tasks before returning one.
+ */
 public class TaskDialog extends JDialog implements ActionListener {
 
+    /**
+     * ok button is pressed
+     */
     int OK_OPTION = 0;
+
+    /**
+     * cancel button is pressed
+     */
     int CANCEL_OPTION = -1;
 
+    /**
+     * the result of which button is clicked.
+     * it's either 0 or -1
+     */
     public static int result;
+
+    /**
+     * label to be displayed when the name or status is empty after pressing the ok button
+     */
+    private JLabel emptyName, emptyStatus;
 
     String name, status;
     JTextField nameTxt, statusTxt;
-    private JLabel emptyName, emptyStatus;
     JButton ok, cancel;
 
+    /**
+     * Creates a dialog with the specified title and
+     * with the specified parent frame
+     *
+     * @param parent the frame from which the dialog is displayed
+     * @param title the title of the dialog
+     */
     public TaskDialog(Frame parent, String title) {
         super(parent, title, true);
         this.setResizable(false);
         addComponents(parent);
     }
 
+    /**
+     * adds the components to the parent frame
+     * @param parent a frame filled with components
+     */
     public void addComponents(Frame parent) {
         Point loc = parent.getLocation();
         setLocation(loc.x + 80, loc.y + 80);
@@ -72,11 +102,6 @@ public class TaskDialog extends JDialog implements ActionListener {
         constraints.gridy = 4;
         panel.add(emptyStatus, constraints);
 
-        JLabel spacer = new JLabel(" "); // adds some extra space between the textFields and the buttons
-        constraints.gridx = 0;
-        constraints.gridy = 6;
-        panel.add(spacer, constraints);
-
         ok = new JButton("ok");
         ok.addActionListener(this);
         constraints.gridwidth = 1;
@@ -94,6 +119,12 @@ public class TaskDialog extends JDialog implements ActionListener {
         pack();
     }
 
+    /**
+     * validates whether the name and status are valid or not.
+     * Empty or blank strings are considered invalid
+     *
+     * @return true if both are valid, false otherwise
+     */
     boolean validateTask() {
         if (name.isEmpty() || status.isEmpty()) {
             if (isNullOrWhitespace(name)) {
@@ -115,15 +146,30 @@ public class TaskDialog extends JDialog implements ActionListener {
         return true;
     }
 
+    /**
+     * checks if the given string is null or contains whitespace only
+     * @param string the string to be checked
+     * @return true if the string is null or contains whitespace only
+     */
     private boolean isNullOrWhitespace(String string) {
         return string == null || string.trim().length() == 0;
     }
 
+    /**
+     * displays the JDialog that returns a task
+     *
+     * @return a task
+     */
     public Task display() {
         this.setVisible(true);
         return new Task(name, status);
     }
 
+    /**
+     *  closes the dialog when the task is valid or the cancel button is pressed
+     *
+     * @param e either the click of the ok or the cancel button
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         Object source = e.getSource();
