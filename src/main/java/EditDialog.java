@@ -5,7 +5,7 @@ public class EditDialog extends TaskDialog {
     private final int id;
 
     public EditDialog(Frame parent, Task task) {
-        super(parent);
+        super(parent, "edit task");
         name = task.getName();
         status = task.getStatus();
 

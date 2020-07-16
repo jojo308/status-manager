@@ -12,13 +12,16 @@ public class TaskDialog extends JDialog implements ActionListener {
 
     String name, status;
     JTextField nameTxt, statusTxt;
-    private final JLabel emptyName, emptyStatus;
-    final JButton ok, cancel;
+    private JLabel emptyName, emptyStatus;
+    JButton ok, cancel;
 
-    public TaskDialog(Frame parent) {
-        super(parent, "task", true);
+    public TaskDialog(Frame parent, String title) {
+        super(parent, title, true);
         this.setResizable(false);
+        addComponents(parent);
+    }
 
+    public void addComponents(Frame parent) {
         Point loc = parent.getLocation();
         setLocation(loc.x + 80, loc.y + 80);
 
