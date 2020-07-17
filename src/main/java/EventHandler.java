@@ -2,6 +2,13 @@ import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+/**
+ * Utility class that reads keyboard input. It saves the content of the
+ * table to the XML file.
+ *
+ * The class has no function for the current version of this application.
+ * This may change in future releases, in which case it will be properly implemented
+ */
 public class EventHandler extends JPanel implements KeyListener {
 
     public EventHandler() {

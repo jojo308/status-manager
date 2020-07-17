@@ -1,18 +1,40 @@
 import javax.xml.bind.*;
 import java.io.File;
 
+/**
+ * A utility class that uses JAXB to read and write to a XML file
+ */
 public class JAXBUtils {
 
-    private static Tasks tasks;
+    /**
+     * The file where this class reads and writes from
+     */
     private static File file;
 
-    // reads a XML source, this methods must be executed before any other method in this class
-    public static Tasks read(String src) throws JAXBException, NullPointerException {
+    /**
+     * the tasks that are written to the file
+     */
+    private static Tasks tasks;
+
+    /**
+     * reads a XML source, this methods must be executed
+     * once before any other method is executed
+     *
+     * @param src the source of the file to be written to
+     * @return the tasks in the XML file
+     * @throws JAXBException if an error occurs while reading the file
+     */
+    public static Tasks read(String src) throws JAXBException {
         file = new File(src);
         return read();
     }
 
-    // read helper method
+    /**
+     * helper method for the read(String src) method
+     *
+     * @return the tasks in the XML file
+     * @throws JAXBException if an error occurs while reading the file
+     */
     private static Tasks read() throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(Tasks.class);
         Unmarshaller unmarshaller = context.createUnmarshaller();
@@ -25,7 +47,12 @@ public class JAXBUtils {
         return tasks;
     }
 
-    // writes the task to the XML file
+    /**
+     * writes the tasks list to the file
+     *
+     * @param tasks the tasks to be written to the file
+     * @throws JAXBException if an error occurs while writing to the file
+     */
     public static void write(Tasks tasks) throws JAXBException {
         read();
         JAXBContext context = JAXBContext.newInstance(Tasks.class);
@@ -38,7 +65,12 @@ public class JAXBUtils {
         marshaller.marshal(tasks, file);
     }
 
-    // edits a specific task in the XML file
+    /**
+     * edit a specific task and overwrite it in the file
+     *
+     * @param task the task to be edited
+     * @throws JAXBException if an error occurs while writing to the file
+     */
     public static void edit(Task task) throws JAXBException {
         tasks = read();
         if (isDocEmpty()) {
@@ -48,7 +80,12 @@ public class JAXBUtils {
         marshal();
     }
 
-    // deletes a specific task from the XML file
+    /**
+     * deletes a specified task by id
+     *
+     * @param id the id of the task that needs to be deleted
+     * @throws JAXBException if an error occurs while writing to the file
+     */
     public static void delete(int id) throws JAXBException {
         tasks = read();
         if (isDocEmpty()) {
@@ -58,6 +95,11 @@ public class JAXBUtils {
         marshal();
     }
 
+    /**
+     * marshals the tasks to the file
+     *
+     * @throws JAXBException if an error occurs while marshalling the file
+     */
     private static void marshal() throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(Tasks.class);
         Marshaller marshaller = context.createMarshaller();
@@ -65,10 +107,11 @@ public class JAXBUtils {
         marshaller.marshal(tasks, file);
     }
 
-    public static Task getElementAt(int row) {
-        return tasks.get(row);
-    }
-
+    /**
+     * checks if the tasks list is empty
+     *
+     * @return true if the list is empty, false otherwise
+     */
     public static boolean isDocEmpty() {
         return tasks == null || tasks.size() < 1;
     }

@@ -8,25 +8,32 @@ public class Tasks {
 
     private List<Task> tasks;
 
-    // the no-arg constructor is needed for JAXB to work
+    /**
+     * constructs a new ArrayList.
+     */
     public Tasks() {
         tasks = new ArrayList<>();
     }
 
+    /**
+     * constructs a new ArrayList with the given list
+     *
+     * @param tasks the list to be created
+     */
     public Tasks(List<Task> tasks) {
-        this.tasks = tasks;
+        this.tasks = new ArrayList<>(tasks);
     }
 
+    /**
+     * returns a list representation of Tasks
+     *
+     * @return a list of tasks
+     */
     public List<Task> getTasks() {
         if (tasks == null) {
             tasks = new ArrayList<>();
         }
         return tasks;
-    }
-
-    @XmlElement(name = "task")
-    public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
     }
 
     /**
@@ -40,10 +47,22 @@ public class Tasks {
         }
     }
 
+    /**
+     * returns a task by id
+     *
+     * @param id the id to be queried
+     * @return the task with the corresponding id
+     */
     public Task get(int id) {
         return tasks.get(id);
     }
 
+    /**
+     * update the given task with the values from updated.
+     * THe id stays the same.
+     *
+     * @param updated the new task
+     */
     public void set(Task updated) {
         for (Task t : tasks) {
             if (t.getId() == updated.getId()) {
@@ -53,6 +72,11 @@ public class Tasks {
         }
     }
 
+    /**
+     * removes a task by id
+     *
+     * @param id the id to be removed
+     */
     public void remove(int id) {
         tasks.removeIf(t -> t.getId() == id);
     }
@@ -77,6 +101,8 @@ public class Tasks {
     }
 
     /**
+     * returns the last task in the list, or null if it's an empty list
+     *
      * @return the last task in the list
      */
     public Task getLast() {
@@ -87,10 +113,21 @@ public class Tasks {
         return tasks.get(tasks.size() - 1);
     }
 
+    /**
+     * returns the size of the list.
+     *
+     * @return the number of tasks in the list
+     */
     public int size() {
         return (tasks == null) ? 0 : tasks.size();
     }
 
+    /**
+     * Returns a string representation of all the tasks in the ArrayList
+     * or "empty list" is the list is empty.
+     *
+     * @return Returns a string representation of the ArrayList.
+     */
     @Override
     public String toString() {
         return (tasks.isEmpty() ? "empty list" : tasks.toString());

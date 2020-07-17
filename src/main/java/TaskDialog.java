@@ -4,10 +4,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * The TaskDialog is an extension of JDialog. It creates a dialog wherein
- * you can create a task. It also validates the tasks before returning one.
+ * The TaskDialog is an extension of JDialog. It creates a dialog with
+ * input fields wherein you can create a task. You cannot submit a task
+ * if any field is left blank.
  */
-public class TaskDialog extends JDialog implements ActionListener {
+public abstract class TaskDialog extends JDialog implements ActionListener {
 
     /**
      * ok button is pressed

@@ -2,7 +2,6 @@ import javax.swing.*;
 import javax.xml.bind.JAXBException;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
 public class MainFrame extends JFrame {
@@ -17,12 +16,8 @@ public class MainFrame extends JFrame {
 
     public MainFrame() {
         setTitle("Status Manager");
-        setSize(300, 500);
+        setSize(600, 550);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // keyListener
-        KeyListener listener = new EventHandler();
-        addKeyListener(listener);
 
         // label to display when the table is empty
         emptyListLabel = new JLabel
@@ -35,13 +30,14 @@ public class MainFrame extends JFrame {
         model = new TaskTableModel(data);
         table = new JTable(model);
 
-        tablePanel.add(table);
+        JScrollPane tableScroller = new JScrollPane(table);
+
+        tablePanel.add(tableScroller);
         tablePanel.add(emptyListLabel);
         refresh();
 
         // buttonPanel
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
 
         // buttons
         JButton addBtn = new JButton("add");
@@ -58,32 +54,39 @@ public class MainFrame extends JFrame {
         buttonPanel.add(deleteBtn);
 
         // contentPane
-        JPanel contentPane = new JPanel();
-        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
+        Container contentPane = getContentPane();
 
-        contentPane.add(buttonPanel);
-        contentPane.add(tablePanel);
+        contentPane.add(buttonPanel, BorderLayout.PAGE_START);
+        contentPane.add(tablePanel, BorderLayout.CENTER);
 
-        getContentPane().add(contentPane, BorderLayout.WEST);
         setVisible(true);
     }
 
     private Tasks readDocument() {
         try {
             return JAXBUtils.read(src);
-        } catch (JAXBException | NullPointerException ignored) {
+        } catch (JAXBException ex) {
+            System.out.println("an error has occurred and the document cannot be read");
+            ex.printStackTrace();
         }
         return new Tasks();
     }
 
+    /**
+     * adds an actionListener which opens {@link AddDialog} that returns a new task.
+     * The returned task wil be written to the file and the table is updated.
+     *
+     * @param parent the frame in which the dialog is displayed
+     * @return an actionListener that opens a AddDialog
+     */
     private ActionListener addPressed(JFrame parent) {
         return e -> {
-            TaskDialog dialog = new TaskDialog(parent);
+            AddDialog dialog = new AddDialog(parent);
             Task task = dialog.display();
 
-            if (TaskDialog.result == 0) {
+            if (AddDialog.result == 0) {
                 try {
-                    Tasks tasks = JAXBUtils.read(src);
+                    Tasks tasks = readDocument();
                     task.setId(tasks.getNextId());
                     tasks.add(task);
                     JAXBUtils.write(tasks);
@@ -95,6 +98,13 @@ public class MainFrame extends JFrame {
         };
     }
 
+    /**
+     * adds an actionListener which opens a {@link EditDialog} that returns the edited task.
+     * The returned task wil be written to the file and the table is updated.
+     *
+     * @param parent the frame in which the dialog is displayed
+     * @return an actionListener that opens an EditDialog
+     */
     private ActionListener editPressed(JFrame parent) {
         return e -> {
             int row = table.getSelectedRow();
@@ -104,11 +114,10 @@ public class MainFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "please select a task");
             } else {
                 Task task = model.getTask(row);
-                TaskDialog dialog = new EditDialog(parent, task);
+                EditDialog dialog = new EditDialog(parent, task);
                 Task updated = dialog.display();
-                if (TaskDialog.result == 0) {
+                if (EditDialog.result == 0) {
                     try {
-                        JAXBUtils.read(src);
                         JAXBUtils.edit(updated);
                         update(updated, updateType.edit);
                     } catch (JAXBException jaxbException) {
@@ -119,6 +128,13 @@ public class MainFrame extends JFrame {
         };
     }
 
+    /**
+     * adds an actionListener which opens a JOptionPane and deletes
+     * the task if the user confirms it.
+     *
+     * @param parent the frame in which the dialog is displayed
+     * @return an actionListener with a JOptionPane
+     */
     private ActionListener deletePressed(JFrame parent) {
         return e -> {
             int row = table.getSelectedRow();
@@ -133,7 +149,6 @@ public class MainFrame extends JFrame {
 
                 if (result == 0) {
                     try {
-                        JAXBUtils.read(src);
                         JAXBUtils.delete(task.getId());
                         update(task, updateType.delete);
                     } catch (JAXBException jaxbException) {
@@ -144,7 +159,10 @@ public class MainFrame extends JFrame {
         };
     }
 
-    enum updateType {
+    /**
+     * the type of the update. Only needed for the update method
+     */
+    private enum updateType {
         add,
         edit,
         delete
@@ -173,6 +191,10 @@ public class MainFrame extends JFrame {
         refresh();
     }
 
+    /**
+     * refreshes the table after an update. If the table
+     * is empty, it will display a special message.
+     */
     public void refresh() {
         if (model.isEmpty()) {
             table.setVisible(false);

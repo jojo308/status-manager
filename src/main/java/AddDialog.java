@@ -1,7 +1,8 @@
 import java.awt.*;
 
 /**
- * Creates a dialog that returns a new task.
+ * Creates a dialog with input fields to create a task. It
+ * returns a new task after submitting.
  */
 public class AddDialog extends TaskDialog{
 
