@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<tasks>
+    <task id="1">
+        <name>company 1</name>
+        <status>pending</status>
+    </task>
+    <task id="2">
+        <name>company 2</name>
+        <status>denied</status>
+    </task>
+    <task id="3">
+        <name>company 3</name>
+        <status>accepted</status>
+    </task>
+</tasks>
